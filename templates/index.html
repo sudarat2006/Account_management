@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Modern WebApp{% endblock %}
+
+{% block content %}
+<div class="hero-section text-white py-5 mb-5">
+  <div class="container text-center position-relative">
+    <h1 class="display-4 fw-bold mb-3">Modern WebApp</h1>
+    <p class="lead mb-0">เลือกฟีเจอร์ที่ต้องการใช้งาน</p>
+  </div>
+</div>
+
+<section class="py-3">
+  <div class="container">
+    <div class="row g-4 justify-content-center">
+      <div class="col-lg-5 col-md-6">
+        <div class="card h-100">
+          <div class="card-body text-center p-4">
+            <div class="icon-feature mb-4">
+              <i class="bi bi-calculator fs-1"></i>
+            </div>
+            <h4 class="mb-3">ตารางสูตรคูณ</h4>
+            <p class="text-muted mb-4">สร้างและแสดงตารางสูตรคูณของตัวเลขที่ต้องการ</p>
+            <a href="{% url 'multipli' %}" class="btn btn-primary w-100">
+              เริ่มใช้งาน <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-5 col-md-6">
+        <div class="card h-100">
+          <div class="card-body text-center p-4">
+            <div class="icon-feature mb-4">
+              <i class="bi bi-arrow-repeat fs-1"></i>
+            </div>
+            <h4 class="mb-3">การวนซ้ำ</h4>
+            <p class="text-muted mb-4">ทดสอบการทำงานของลูปและการวนซ้ำข้อมูล</p>
+            <a href="{% url 'for' %}" class="btn btn-primary w-100">
+              เริ่มใช้งาน <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock content %}
