@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>รายการรายรับ</h2>
+<a href="{% url 'income_add' %}" class="btn btn-success">เพิ่มรายรับ</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>วันที่</th>
+            <th>หมวดหมู่</th>
+            <th>รายละเอียด</th>
+            <th>จำนวนเงิน</th>
+            <th>จัดการ</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for income in incomes %}
+        <tr>
+            <td>{{ income.date }}</td>
+            <td>{{ income.category.name }}</td>
+            <td>{{ income.description }}</td>
+            <td>{{ income.amount }}</td>
+            <td>
+                <a href="{% url 'income_edit' income.id %}" class="btn btn-warning btn-sm">แก้ไข</a>
+                <a href="{% url 'income_delete' income.id %}" class="btn btn-danger btn-sm">ลบ</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">เพิ่มรายรับ</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
