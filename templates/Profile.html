@@ -1,24 +1,16 @@
 {% extends "base.html" %}
-
-{% block title %}Profile | Modern WebApp{% endblock %}
+{% block title %}Profile{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-      <div class="card shadow">
-        <div class="card-header text-center bg-primary text-white">
-          <h3>ข้อมูลโปรไฟล์</h3>
-        </div>
-        <div class="card-body">
-          <p><strong>username:</strong> {{ first_name }}</p>
-          <p><strong>password:</strong> {{ last_name }}</p>
-        </div>
-        <div class="card-footer text-center">
-          <a href="{% url 'logout' %}" class="btn btn-danger">ออกจากระบบ</a>
-        </div>
-      </div>
+<div class="container mt-5">
+  <div class="card">
+    <div class="card-body">
+      <h3>ข้อมูลผู้ใช้</h3>
+      <p><strong>ชื่อผู้ใช้:</strong> {{ user.username }}</p>
+      <p><strong>ชื่อจริง:</strong> {{ user.first_name|default:"-" }}</p>
+      <p><strong>นามสกุล:</strong> {{ user.last_name|default:"-" }}</p>
+      <a href="{% url 'logout' %}" class="btn btn-danger">ออกจากระบบ</a>
     </div>
   </div>
 </div>
-{% endblock content %}
+{% endblock %}
