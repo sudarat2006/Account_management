@@ -1,6 +1,31 @@
+# forms.py
 from django import forms
+from .models import Expense
 
-class ExpenseForm(forms.Form):
-    description = forms.CharField(label='รายละเอียด', max_length=255, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    amount = forms.DecimalField(label='จำนวนเงิน', max_digits=10, decimal_places=2, widget=forms.NumberInput(attrs={'class': 'form-control'}))
-    date = forms.DateField(label='วันที่', widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
+class ExpenseForm(forms.ModelForm):
+    class Meta:
+        model = Expense
+        fields = ['description', 'amount', 'date']
+        widgets = {
+            'description': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'กรอกรายการค่าใช้จ่าย'
+            }),
+            'amount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0',
+                'placeholder': '0.00'
+            }),
+            'date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+        }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # ตั้งค่าเริ่มต้นเป็นวันที่ปัจจุบันถ้าไม่มีข้อมูล
+        if not self.instance.pk:
+            from django.utils import timezone
+            self.fields['date'].initial = timezone.now().date()

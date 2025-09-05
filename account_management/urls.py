@@ -6,7 +6,7 @@ urlpatterns = [
 
     # Expense CRUD
     path('expense/', views.expense_list, name='expense_list'),
-    path('expense/add/', views.expense_add, name='expense_add'),   # ← ชื่อตรงกับ template
+    path('expense/add/', views.expense_add, name='expense_add'),  
     path('expense/edit/<int:id>/', views.expense_edit, name='expense_edit'),
     path('expense/delete/<int:id>/', views.expense_delete, name='expense_delete'),
 ]
