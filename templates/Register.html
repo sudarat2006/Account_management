@@ -1,45 +1,249 @@
 {% extends "base.html" %}
-{% block title %}Register | Modern WebApp{% endblock %}
+{% block title %}สมัครสมาชิก{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-      <div class="card shadow-sm">
-        <div class="card-body p-4">
-          <h3 class="text-center mb-4">สมัครสมาชิก</h3>
+<!-- Background gradient -->
+<div class="min-vh-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6">
+        
+        <!-- Card with shadow and rounded corners -->
+        <div class="card shadow-lg border-0 rounded-4">
+          <div class="card-body p-5">
+            
+            <!-- Header with icon -->
+            <div class="text-center mb-4">
+              <div class="bg-primary bg-gradient rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                   style="width: 80px; height: 80px;">
+                <i class="fas fa-user-plus text-white fs-2"></i>
+              </div>
+              <h2 class="fw-bold text-primary mb-2">สมัครสมาชิก</h2>
+              <p class="text-muted">กรอกข้อมูลเพื่อเข้าร่วมกับเรา</p>
+            </div>
 
-          {% if messages %}
-            {% for message in messages %}
-              <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
+            <!-- Messages -->
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show rounded-3" role="alert">
+                  <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% else %}check-circle{% endif %} me-2"></i>
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+              {% endfor %}
+            {% endif %}
 
-          <form method="post">
-            {% csrf_token %}
-            <div class="mb-3">
-              <input type="text" name="username" class="form-control" placeholder="ชื่อผู้ใช้" required>
-            </div>
-            <div class="mb-3">
-             <input type="text" name="first_name" class="form-control" placeholder="ชื่อ" required>
-            </div>
-            <div class="mb-3">
-             <input type="text" name="last_name" class="form-control" placeholder="นามสกุล" required>
-            </div>
-            <div class="mb-3">
-              <input type="password" name="password" class="form-control" placeholder="รหัสผ่าน" required>
-            </div>
-            <div class="d-grid">
-              <button type="submit" class="btn btn-success">สมัครสมาชิก</button>
-            </div>
-          </form>
+            <!-- Registration Form -->
+            <form method="post" class="needs-validation" novalidate>
+              {% csrf_token %}
+              
+              <!-- Username Field -->
+              <div class="mb-4">
+                <label for="username" class="form-label fw-semibold">
+                  <i class="fas fa-user text-primary me-2"></i>ชื่อผู้ใช้
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0">
+                    <i class="fas fa-at text-muted"></i>
+                  </span>
+                  <input type="text" 
+                         class="form-control border-start-0 ps-0" 
+                         id="username" 
+                         name="username" 
+                         placeholder="กรอกชื่อผู้ใช้" 
+                         required>
+                  <div class="invalid-feedback">กรุณากรอกชื่อผู้ใช้</div>
+                </div>
+              </div>
 
-          <div class="text-center mt-3">
-            <small>มีบัญชีอยู่แล้วใช่ไหม? <a href="{% url 'login' %}">เข้าสู่ระบบที่นี่</a></small>
+              <!-- First Name Field -->
+              <div class="mb-4">
+                <label for="first_name" class="form-label fw-semibold">
+                  <i class="fas fa-id-card text-success me-2"></i>ชื่อจริง
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0">
+                    <i class="fas fa-signature text-muted"></i>
+                  </span>
+                  <input type="text" 
+                         class="form-control border-start-0 ps-0" 
+                         id="first_name" 
+                         name="first_name" 
+                         placeholder="กรอกชื่อจริง" 
+                         required>
+                  <div class="invalid-feedback">กรุณากรอกชื่อจริง</div>
+                </div>
+              </div>
+
+              <!-- Last Name Field -->
+              <div class="mb-4">
+                <label for="last_name" class="form-label fw-semibold">
+                  <i class="fas fa-id-badge text-info me-2"></i>นามสกุล
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0">
+                    <i class="fas fa-user-tag text-muted"></i>
+                  </span>
+                  <input type="text" 
+                         class="form-control border-start-0 ps-0" 
+                         id="last_name" 
+                         name="last_name" 
+                         placeholder="กรอกนามสกุล" 
+                         required>
+                  <div class="invalid-feedback">กรุณากรอกนามสกุล</div>
+                </div>
+              </div>
+
+              <!-- Password Field -->
+              <div class="mb-4">
+                <label for="password" class="form-label fw-semibold">
+                  <i class="fas fa-lock text-warning me-2"></i>รหัสผ่าน
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0">
+                    <i class="fas fa-key text-muted"></i>
+                  </span>
+                  <input type="password" 
+                         class="form-control border-start-0 ps-0" 
+                         id="password" 
+                         name="password" 
+                         placeholder="กรอกรหัสผ่าน" 
+                         minlength="6"
+                         required>
+                  <button class="btn btn-outline-secondary border-start-0" 
+                          type="button" 
+                          onclick="togglePassword()">
+                    <i class="fas fa-eye" id="toggleIcon"></i>
+                  </button>
+                  <div class="invalid-feedback">กรุณากรอกรหัสผ่านอย่างน้อย 6 ตัวอักษร</div>
+                </div>
+                <small class="text-muted">รหัสผ่านควรมีอย่างน้อย 6 ตัวอักษร</small>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="d-grid mb-4">
+                <button type="submit" 
+                        class="btn btn-primary btn-lg py-3 rounded-3 fw-semibold">
+                  <i class="fas fa-user-plus me-2"></i>สมัครสมาชิก
+                </button>
+              </div>
+
+              <!-- Divider -->
+              <div class="text-center mb-3">
+                <span class="text-muted">หรือ</span>
+              </div>
+
+              <!-- Login Link -->
+              <div class="text-center">
+                <p class="mb-0 text-muted">
+                  มีบัญชีอยู่แล้ว? 
+                  <a href="{% url 'login' %}" 
+                     class="text-primary text-decoration-none fw-semibold">
+                    <i class="fas fa-sign-in-alt me-1"></i>เข้าสู่ระบบ
+                  </a>
+                </p>
+              </div>
+
+            </form>
           </div>
         </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-4">
+          <p class="text-white-50 mb-0">
+            <i class="fas fa-shield-alt me-2"></i>
+            ข้อมูลของคุณจะได้รับการปกป้องอย่างปลอดภัย
+          </p>
+        </div>
+
       </div>
     </div>
   </div>
 </div>
+
+<!-- Custom CSS -->
+<style>
+  .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  }
+  
+  .input-group-text {
+    border: 1px solid #dee2e6;
+  }
+  
+  .card {
+    backdrop-filter: blur(10px);
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  }
+  
+  .alert {
+    border: none;
+  }
+  
+  @media (max-width: 768px) {
+    .card-body {
+      padding: 2rem !important;
+    }
+  }
+</style>
+
+<!-- JavaScript for form validation and password toggle -->
+<script>
+// Form validation
+(function() {
+  'use strict';
+  window.addEventListener('load', function() {
+    var forms = document.getElementsByClassName('needs-validation');
+    var validation = Array.prototype.filter.call(forms, function(form) {
+      form.addEventListener('submit', function(event) {
+        if (form.checkValidity() === false) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  }, false);
+})();
+
+// Password toggle
+function togglePassword() {
+  const passwordInput = document.getElementById('password');
+  const toggleIcon = document.getElementById('toggleIcon');
+  
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    toggleIcon.classList.remove('fa-eye');
+    toggleIcon.classList.add('fa-eye-slash');
+  } else {
+    passwordInput.type = 'password';
+    toggleIcon.classList.remove('fa-eye-slash');
+    toggleIcon.classList.add('fa-eye');
+  }
+}
+
+// Auto dismiss alerts after 5 seconds
+setTimeout(function() {
+  const alerts = document.querySelectorAll('.alert');
+  alerts.forEach(function(alert) {
+    const bsAlert = new bootstrap.Alert(alert);
+    bsAlert.close();
+  });
+}, 5000);
+</script>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}

@@ -4,9 +4,6 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-def profile(request):
-    return render(request, 'profile.html', {'user': request.user})
-
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -23,22 +20,11 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
-@login_required(login_url='login')  # ถ้าไม่ล็อกอินจะไปหน้า login
+@login_required(login_url='login')
 def profile(request):
     user = request.user
     context = {
-        'first_name': user.first_name,
-        'last_name': user.last_name,
-        'username': user.username,
-    }
-    return render(request, 'profile.html', context)
-
-from django.contrib.auth.decorators import login_required
-
-def profile(request):
-    user = request.user
-    
-    context = {
+        'user': user,  # ส่ง user object ทั้งหมด
         'username': user.username,
         'first_name': user.first_name,
         'last_name': user.last_name,
@@ -49,20 +35,27 @@ def profile(request):
 def register(request):
     if request.method == 'POST':
         username = request.POST.get('username')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
         password = request.POST.get('password')
 
-        # ตรวจสอบว่ามี username ซ้ำไหม
+        # ตรวจสอบว่าชื่อผู้ใช้ซ้ำไหม
         if User.objects.filter(username=username).exists():
-            messages.error(request, 'ชื่อผู้ใช้นี้ถูกใช้ไปแล้ว')
-        else:
-        
-            user = User.objects.create_user(
-                username=username,
-                password=password,
-                first_name='',
-                last_name=''
-            )
-            messages.success(request, 'สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ')
-            return redirect('login')
+            messages.error(request, 'ชื่อผู้ใช้นี้มีอยู่แล้ว')
+            return redirect('register')
 
+        # สร้างผู้ใช้ใหม่
+        user = User.objects.create_user(
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            password=password
+        )
+
+        # เข้าสู่ระบบ
+        login(request, user)
+
+        return redirect('profile')  # ไปหน้าโปรไฟล์หลังสมัคร
+
+    # ถ้าเป็น GET แสดงฟอร์มกรอกข้อมูล
     return render(request, 'register.html')
