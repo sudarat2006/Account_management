@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.contrib import admin
 from .models import Expense
 
-@admin.register(Expense)
+admin.register(Expense)
 class ExpenseAdmin(admin.ModelAdmin):
     list_display = ['description', 'amount', 'date', 'created_at']
     list_filter = ['date', 'created_at']
