@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - ระบบจัดการรายรับรายจ่าย{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">📊 Dashboard</h1>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">รายรับเดือนนี้</h5>
+                    <h3 class="card-text">฿{{ monthly_income|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5 class="card-title">รายจ่ายเดือนนี้</h5>
+                    <h3 class="card-text">฿{{ monthly_expense|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card {% if monthly_balance >= 0 %}bg-primary{% else %}bg-warning{% endif %} text-white">
+                <div class="card-body">
+                    <h5 class="card-title">ยอดคงเหลือเดือนนี้</h5>
+                    <h3 class="card-text">฿{{ monthly_balance|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">รายรับปีนี้</h5>
+                    <h3 class="card-text">฿{{ yearly_income|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>📈 รายรับ-รายจ่ายรายเดือน</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>🥧 สรุปตามหมวดหมู่</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>💰 รายรับล่าสุด</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_income %}
+                        <div class="list-group">
+                            {% for income in recent_income %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ income.category.name }}</h6>
+                                    <small class="text-success">฿{{ income.amount|floatformat:2 }}</small>
+                                </div>
+                                <p class="mb-1">{{ income.description }}</p>
+                                <small>{{ income.date|date:"d/m/Y" }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">ไม่มีข้อมูลรายรับ</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>💸 รายจ่ายล่าสุด</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_expense %}
+                        <div class="list-group">
+                            {% for expense in recent_expense %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ expense.category.name }}</h6>
+                                    <small class="text-danger">฿{{ expense.amount|floatformat:2 }}</small>
+                                </div>
+                                <p class="mb-1">{{ expense.description }}</p>
+                                <small>{{ expense.date|date:"d/m/Y" }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">ไม่มีข้อมูลรายจ่าย</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>⚡ การดำเนินการด่วน</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="{% url 'monthly_report' %}" class="btn btn-outline-primary btn-block">
+                                📊 รายงานรายเดือน
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'yearly_report' %}" class="btn btn-outline-info btn-block">
+                                📈 รายงานรายปี
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'summary' %}" class="btn btn-outline-success btn-block">
+                                📋 สรุปยอดรวม
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="/admin/" class="btn btn-outline-secondary btn-block">
+                                ⚙️ จัดการข้อมูล
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Monthly Chart
+const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+const monthlyChart = new Chart(monthlyCtx, {
+    type: 'line',
+    data: {
+        labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'],
+        datasets: [{
+            label: 'รายรับ',
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ monthly_income }}],
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.1
+        }, {
+            label: 'รายจ่าย',
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ monthly_expense }}],
+            borderColor: 'rgb(255, 99, 132)',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'รายรับ-รายจ่ายรายเดือน'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Category Chart
+const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+const categoryChart = new Chart(categoryCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['รายรับ', 'รายจ่าย'],
+        datasets: [{
+            data: [{{ monthly_income }}, {{ monthly_expense }}],
+            backgroundColor: [
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(255, 99, 132, 0.8)'
+            ],
+            borderColor: [
+                'rgba(75, 192, 192, 1)',
+                'rgba(255, 99, 132, 1)'
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'สัดส่วนรายรับ-รายจ่าย'
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

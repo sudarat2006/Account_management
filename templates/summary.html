@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}สรุปยอดรวม - ระบบจัดการรายรับรายจ่าย{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">📋 สรุปยอดรวม</h1>
+            <p class="text-muted">สรุปข้อมูลทั้งหมดของคุณ</p>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">รายรับรวม</h5>
+                    <h3 class="card-text">฿{{ total_income|floatformat:2 }}</h3>
+                    <small>{{ total_income_count }} รายการ</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5 class="card-title">รายจ่ายรวม</h5>
+                    <h3 class="card-text">฿{{ total_expense|floatformat:2 }}</h3>
+                    <small>{{ total_expense_count }} รายการ</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card {% if total_balance >= 0 %}bg-primary{% else %}bg-warning{% endif %} text-white">
+                <div class="card-body">
+                    <h5 class="card-title">ยอดคงเหลือ</h5>
+                    <h3 class="card-text">฿{{ total_balance|floatformat:2 }}</h3>
+                    <small>{% if total_balance >= 0 %}กำไร{% else %}ขาดทุน{% endif %}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">รายการทั้งหมด</h5>
+                    <h3 class="card-text">{{ total_income_count|add:total_expense_count }}</h3>
+                    <small>รายการ</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Summary -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>📈 สรุปตามหมวดหมู่รายรับ</h5>
+                </div>
+                <div class="card-body">
+                    {% if income_by_category %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>หมวดหมู่</th>
+                                        <th>จำนวนเงิน</th>
+                                        <th>จำนวนรายการ</th>
+                                        <th>สัดส่วน</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in income_by_category %}
+                                    <tr>
+                                        <td>{{ item.category__name }}</td>
+                                        <td class="text-success">฿{{ item.total|floatformat:2 }}</td>
+                                        <td>{{ item.count }} รายการ</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar bg-success" role="progressbar" 
+                                                     style="width: {% widthratio item.total total_income 100 %}%">
+                                                    {% widthratio item.total total_income 100 %}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">ไม่มีข้อมูลรายรับ</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>📉 สรุปตามหมวดหมู่รายจ่าย</h5>
+                </div>
+                <div class="card-body">
+                    {% if expense_by_category %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>หมวดหมู่</th>
+                                        <th>จำนวนเงิน</th>
+                                        <th>จำนวนรายการ</th>
+                                        <th>สัดส่วน</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in expense_by_category %}
+                                    <tr>
+                                        <td>{{ item.category__name }}</td>
+                                        <td class="text-danger">฿{{ item.total|floatformat:2 }}</td>
+                                        <td>{{ item.count }} รายการ</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar bg-danger" role="progressbar" 
+                                                     style="width: {% widthratio item.total total_expense 100 %}%">
+                                                    {% widthratio item.total total_expense 100 %}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">ไม่มีข้อมูลรายจ่าย</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>💰 รายรับล่าสุด</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_income %}
+                        <div class="list-group">
+                            {% for income in recent_income %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ income.category.name }}</h6>
+                                    <small class="text-success">฿{{ income.amount|floatformat:2 }}</small>
+                                </div>
+                                <p class="mb-1">{{ income.description }}</p>
+                                <small>{{ income.date|date:"d/m/Y" }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">ไม่มีข้อมูลรายรับ</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>💸 รายจ่ายล่าสุด</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_expense %}
+                        <div class="list-group">
+                            {% for expense in recent_expense %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ expense.category.name }}</h6>
+                                    <small class="text-danger">฿{{ expense.amount|floatformat:2 }}</small>
+                                </div>
+                                <p class="mb-1">{{ expense.description }}</p>
+                                <small>{{ expense.date|date:"d/m/Y" }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">ไม่มีข้อมูลรายจ่าย</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-primary btn-block">
+                                🏠 กลับ Dashboard
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'monthly_report' %}" class="btn btn-outline-info btn-block">
+                                📊 รายงานรายเดือน
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'yearly_report' %}" class="btn btn-outline-success btn-block">
+                                📈 รายงานรายปี
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="/admin/" class="btn btn-outline-secondary btn-block">
+                                ⚙️ จัดการข้อมูล
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

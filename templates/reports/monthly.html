@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+
+{% block title %}รายงานรายเดือน - ระบบจัดการรายรับรายจ่าย{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">📊 รายงานรายเดือน</h1>
+            <p class="text-muted">เดือน {{ month }}/{{ year }}</p>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">รายรับรวม</h5>
+                    <h3 class="card-text">฿{{ monthly_income|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5 class="card-title">รายจ่ายรวม</h5>
+                    <h3 class="card-text">฿{{ monthly_expense|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card {% if monthly_balance >= 0 %}bg-primary{% else %}bg-warning{% endif %} text-white">
+                <div class="card-body">
+                    <h5 class="card-title">ยอดคงเหลือ</h5>
+                    <h3 class="card-text">฿{{ monthly_balance|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>📈 สรุปตามหมวดหมู่รายรับ</h5>
+                </div>
+                <div class="card-body">
+                    {% if income_by_category %}
+                        <canvas id="incomeChart" width="400" height="200"></canvas>
+                    {% else %}
+                        <p class="text-muted">ไม่มีข้อมูลรายรับในเดือนนี้</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>📉 สรุปตามหมวดหมู่รายจ่าย</h5>
+                </div>
+                <div class="card-body">
+                    {% if expense_by_category %}
+                        <canvas id="expenseChart" width="400" height="200"></canvas>
+                    {% else %}
+                        <p class="text-muted">ไม่มีข้อมูลรายจ่ายในเดือนนี้</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Lists -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>💰 รายการรายรับ</h5>
+                </div>
+                <div class="card-body">
+                    {% if income_list %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>วันที่</th>
+                                        <th>หมวดหมู่</th>
+                                        <th>จำนวนเงิน</th>
+                                        <th>รายละเอียด</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for income in income_list %}
+                                    <tr>
+                                        <td>{{ income.date|date:"d/m/Y" }}</td>
+                                        <td>{{ income.category.name }}</td>
+                                        <td class="text-success">฿{{ income.amount|floatformat:2 }}</td>
+                                        <td>{{ income.description|truncatechars:30 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">ไม่มีข้อมูลรายรับในเดือนนี้</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>💸 รายการรายจ่าย</h5>
+                </div>
+                <div class="card-body">
+                    {% if expense_list %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>วันที่</th>
+                                        <th>หมวดหมู่</th>
+                                        <th>จำนวนเงิน</th>
+                                        <th>รายละเอียด</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for expense in expense_list %}
+                                    <tr>
+                                        <td>{{ expense.date|date:"d/m/Y" }}</td>
+                                        <td>{{ expense.category.name }}</td>
+                                        <td class="text-danger">฿{{ expense.amount|floatformat:2 }}</td>
+                                        <td>{{ expense.description|truncatechars:30 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">ไม่มีข้อมูลรายจ่ายในเดือนนี้</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-primary btn-block">
+                                🏠 กลับ Dashboard
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'yearly_report' %}" class="btn btn-outline-info btn-block">
+                                📈 รายงานรายปี
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'summary' %}" class="btn btn-outline-success btn-block">
+                                📋 สรุปยอดรวม
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="/admin/" class="btn btn-outline-secondary btn-block">
+                                ⚙️ จัดการข้อมูล
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Income Chart
+{% if income_by_category %}
+const incomeCtx = document.getElementById('incomeChart').getContext('2d');
+const incomeChart = new Chart(incomeCtx, {
+    type: 'pie',
+    data: {
+        labels: [
+            {% for item in income_by_category %}
+                '{{ item.category__name }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for item in income_by_category %}
+                    {{ item.total }},
+                {% endfor %}
+            ],
+            backgroundColor: [
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 205, 86, 0.8)',
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)'
+            ],
+            borderColor: [
+                'rgba(75, 192, 192, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 205, 86, 1)',
+                'rgba(255, 99, 132, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'รายรับตามหมวดหมู่'
+            }
+        }
+    }
+});
+{% endif %}
+
+// Expense Chart
+{% if expense_by_category %}
+const expenseCtx = document.getElementById('expenseChart').getContext('2d');
+const expenseChart = new Chart(expenseCtx, {
+    type: 'pie',
+    data: {
+        labels: [
+            {% for item in expense_by_category %}
+                '{{ item.category__name }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for item in expense_by_category %}
+                    {{ item.total }},
+                {% endfor %}
+            ],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 205, 86, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 205, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'รายจ่ายตามหมวดหมู่'
+            }
+        }
+    }
+});
+{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+
+{% block title %}รายงานรายปี - ระบบจัดการรายรับรายจ่าย{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">📈 รายงานรายปี</h1>
+            <p class="text-muted">ปี {{ year }}</p>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">รายรับรวม</h5>
+                    <h3 class="card-text">฿{{ yearly_income|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5 class="card-title">รายจ่ายรวม</h5>
+                    <h3 class="card-text">฿{{ yearly_expense|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card {% if yearly_balance >= 0 %}bg-primary{% else %}bg-warning{% endif %} text-white">
+                <div class="card-body">
+                    <h5 class="card-title">ยอดคงเหลือ</h5>
+                    <h3 class="card-text">฿{{ yearly_balance|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Chart -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>📊 รายรับ-รายจ่ายรายเดือน</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Charts -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>📈 สรุปตามหมวดหมู่รายรับ</h5>
+                </div>
+                <div class="card-body">
+                    {% if income_by_category %}
+                        <canvas id="incomeChart" width="400" height="200"></canvas>
+                    {% else %}
+                        <p class="text-muted">ไม่มีข้อมูลรายรับในปีนี้</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>📉 สรุปตามหมวดหมู่รายจ่าย</h5>
+                </div>
+                <div class="card-body">
+                    {% if expense_by_category %}
+                        <canvas id="expenseChart" width="400" height="200"></canvas>
+                    {% else %}
+                        <p class="text-muted">ไม่มีข้อมูลรายจ่ายในปีนี้</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Summary Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>📋 สรุปรายเดือน</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>เดือน</th>
+                                    <th>รายรับ</th>
+                                    <th>รายจ่าย</th>
+                                    <th>ยอดคงเหลือ</th>
+                                    <th>สถานะ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in monthly_data %}
+                                <tr>
+                                    <td>
+                                        {% if data.month == 1 %}มกราคม
+                                        {% elif data.month == 2 %}กุมภาพันธ์
+                                        {% elif data.month == 3 %}มีนาคม
+                                        {% elif data.month == 4 %}เมษายน
+                                        {% elif data.month == 5 %}พฤษภาคม
+                                        {% elif data.month == 6 %}มิถุนายน
+                                        {% elif data.month == 7 %}กรกฎาคม
+                                        {% elif data.month == 8 %}สิงหาคม
+                                        {% elif data.month == 9 %}กันยายน
+                                        {% elif data.month == 10 %}ตุลาคม
+                                        {% elif data.month == 11 %}พฤศจิกายน
+                                        {% elif data.month == 12 %}ธันวาคม
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-success">฿{{ data.income|floatformat:2 }}</td>
+                                    <td class="text-danger">฿{{ data.expense|floatformat:2 }}</td>
+                                    <td class="{% if data.balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                        ฿{{ data.balance|floatformat:2 }}
+                                    </td>
+                                    <td>
+                                        {% if data.balance >= 0 %}
+                                            <span class="badge bg-success">กำไร</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">ขาดทุน</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-primary btn-block">
+                                🏠 กลับ Dashboard
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'monthly_report' %}" class="btn btn-outline-info btn-block">
+                                📊 รายงานรายเดือน
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'summary' %}" class="btn btn-outline-success btn-block">
+                                📋 สรุปยอดรวม
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="/admin/" class="btn btn-outline-secondary btn-block">
+                                ⚙️ จัดการข้อมูล
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Monthly Chart
+const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+const monthlyChart = new Chart(monthlyCtx, {
+    type: 'line',
+    data: {
+        labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'],
+        datasets: [{
+            label: 'รายรับ',
+            data: [
+                {% for data in monthly_data %}
+                    {{ data.income }},
+                {% endfor %}
+            ],
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.1
+        }, {
+            label: 'รายจ่าย',
+            data: [
+                {% for data in monthly_data %}
+                    {{ data.expense }},
+                {% endfor %}
+            ],
+            borderColor: 'rgb(255, 99, 132)',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'รายรับ-รายจ่ายรายเดือน'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Income Chart
+{% if income_by_category %}
+const incomeCtx = document.getElementById('incomeChart').getContext('2d');
+const incomeChart = new Chart(incomeCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [
+            {% for item in income_by_category %}
+                '{{ item.category__name }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for item in income_by_category %}
+                    {{ item.total }},
+                {% endfor %}
+            ],
+            backgroundColor: [
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 205, 86, 0.8)',
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)'
+            ],
+            borderColor: [
+                'rgba(75, 192, 192, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 205, 86, 1)',
+                'rgba(255, 99, 132, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'รายรับตามหมวดหมู่'
+            }
+        }
+    }
+});
+{% endif %}
+
+// Expense Chart
+{% if expense_by_category %}
+const expenseCtx = document.getElementById('expenseChart').getContext('2d');
+const expenseChart = new Chart(expenseCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [
+            {% for item in expense_by_category %}
+                '{{ item.category__name }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for item in expense_by_category %}
+                    {{ item.total }},
+                {% endfor %}
+            ],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 205, 86, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 205, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'รายจ่ายตามหมวดหมู่'
+            }
+        }
+    }
+});
+{% endif %}
+</script>
+{% endblock %}
