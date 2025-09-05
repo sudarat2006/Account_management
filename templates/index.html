@@ -1,43 +1,342 @@
-{% extends "base.html" %}
-
-{% block title %}Modern WebApp{% endblock %}
-
-{% block content %}
-<div class="hero-section text-white py-5 mb-5">
-  <div class="container text-center position-relative">
-    <h1 class="display-4 fw-bold mb-3">Modern WebApp</h1>
-    <p class="lead mb-0">เลือกฟีเจอร์ที่ต้องการใช้งาน</p>
-  </div>
-</div>
-
-<section class="py-3">
-  <div class="container">
-    <div class="row g-4 justify-content-center">
-      <div class="col-lg-5 col-md-6">
-        <div class="card h-100">
-          <div class="card-body text-center p-4">
-            <div class="icon-feature mb-4">
-              <i class="bi bi-calculator fs-1"></i>
-            </div>
-            <h4 class="mb-3">ตารางสูตรคูณ</h4>
-            <p class="text-muted mb-4">สร้างและแสดงตารางสูตรคูณของตัวเลขที่ต้องการ</p>
-          </div>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการรายจ่าย</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .expense-app {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        .table th {
+            background-color: #495057 !important;
+            color: white;
+        }
+        .btn-group-sm .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        .total-row {
+            background-color: #e3f2fd !important;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="expense-app">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <span class="navbar-brand">💰 ระบบจัดการรายจ่าย</span>
         </div>
-      </div>
-      
-      <div class="col-lg-5 col-md-6">
-        <div class="card h-100">
-          <div class="card-body text-center p-4">
-            <div class="icon-feature mb-4">
-              <i class="bi bi-arrow-repeat fs-1"></i>
+    </nav>
+
+    <div class="container">
+        <div id="app">
+            <!-- หน้ารายการรายจ่าย -->
+            <div id="expense-list" class="page">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1>รายการรายจ่าย</h1>
+                    <button class="btn btn-success" onclick="showAddForm()">
+                        <i class="bi bi-plus-circle"></i> เพิ่มรายจ่าย
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60px;">#</th>
+                                        <th>รายการ</th>
+                                        <th style="width: 120px;">จำนวนเงิน</th>
+                                        <th style="width: 120px;">วันที่</th>
+                                        <th style="width: 150px;">การจัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expenses-tbody">
+                                    <!-- ข้อมูลจะแสดงที่นี่ -->
+                                </tbody>
+                                <tfoot>
+                                    <tr class="total-row">
+                                        <td colspan="2" class="text-center">รวมทั้งหมด</td>
+                                        <td id="total-amount" class="text-end">0.00 บาท</td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        
+                        <div id="empty-state" class="text-center py-5" style="display: none;">
+                            <div class="text-muted">
+                                <h4>ยังไม่มีรายการรายจ่าย</h4>
+                                <p>คลิกปุ่ม "เพิ่มรายจ่าย" เพื่อเริ่มต้นบันทึกรายจ่ายของคุณ</p>
+                                <button class="btn btn-primary" onclick="showAddForm()">เพิ่มรายจ่าย</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <h4 class="mb-3">การวนซ้ำ</h4>
-            <p class="text-muted mb-4">ทดสอบการทำงานของลูปและการวนซ้ำข้อมูล</p>
-            
-          </div>
+
+            <!-- ฟอร์มเพิ่ม/แก้ไขรายจ่าย -->
+            <div id="expense-form" class="page" style="display: none;">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 id="form-title">เพิ่มรายจ่าย</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="expenseForm" onsubmit="handleSubmit(event)">
+                                    <input type="hidden" id="expense-id" value="">
+                                    
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">รายการ *</label>
+                                        <input type="text" class="form-control" id="description" 
+                                               placeholder="เช่น ค่าอาหาร, ค่าน้ำมัน" required>
+                                        <div class="invalid-feedback">กรุณากรอกรายการ</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="amount" class="form-label">จำนวนเงิน (บาท) *</label>
+                                        <input type="number" class="form-control" id="amount" 
+                                               placeholder="0.00" step="0.01" min="0" required>
+                                        <div class="invalid-feedback">กรุณากรอกจำนวนเงิน</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="date" class="form-label">วันที่ *</label>
+                                        <input type="date" class="form-control" id="date" required>
+                                        <div class="invalid-feedback">กรุณาเลือกวันที่</div>
+                                    </div>
+
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-primary" id="submit-btn">
+                                            บันทึกรายจ่าย
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="showExpenseList()">
+                                            ยกเลิก
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-</section>
-{% endblock content %}
+
+    <!-- Modal ยืนยันการลบ -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">ยืนยันการลบ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>คุณแน่ใจหรือไม่ที่จะลบรายจ่ายนี้?</p>
+                    <div class="alert alert-warning">
+                        <div id="delete-details"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">ยืนยันการลบ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // ข้อมูลรายจ่าย (จำลอง localStorage)
+        let expenses = [
+            { id: 1, description: 'ค่าอาหาร', amount: 120.00, date: '2025-09-04' },
+            { id: 2, description: 'ค่าน้ำมัน', amount: 500.00, date: '2025-09-03' }
+        ];
+        let nextId = 3;
+        let deleteId = null;
+
+        // แสดงรายการรายจ่าย
+        function showExpenseList() {
+            document.getElementById('expense-list').style.display = 'block';
+            document.getElementById('expense-form').style.display = 'none';
+            renderExpenses();
+        }
+
+        // แสดงฟอร์มเพิ่มรายจ่าย
+        function showAddForm() {
+            document.getElementById('expense-list').style.display = 'none';
+            document.getElementById('expense-form').style.display = 'block';
+            document.getElementById('form-title').textContent = 'เพิ่มรายจ่าย';
+            document.getElementById('submit-btn').textContent = 'บันทึกรายจ่าย';
+            document.getElementById('expenseForm').reset();
+            document.getElementById('expense-id').value = '';
+            
+            // ตั้งวันที่เป็นวันปัจจุบัน
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+        }
+
+        // แสดงฟอร์มแก้ไขรายจ่าย
+        function showEditForm(id) {
+            const expense = expenses.find(e => e.id === id);
+            if (!expense) return;
+
+            document.getElementById('expense-list').style.display = 'none';
+            document.getElementById('expense-form').style.display = 'block';
+            document.getElementById('form-title').textContent = 'แก้ไขรายจ่าย';
+            document.getElementById('submit-btn').textContent = 'บันทึกการแก้ไข';
+            
+            document.getElementById('expense-id').value = expense.id;
+            document.getElementById('description').value = expense.description;
+            document.getElementById('amount').value = expense.amount;
+            document.getElementById('date').value = expense.date;
+        }
+
+        // จัดการการส่งฟอร์ม
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+
+            const id = document.getElementById('expense-id').value;
+            const description = document.getElementById('description').value.trim();
+            const amount = parseFloat(document.getElementById('amount').value);
+            const date = document.getElementById('date').value;
+
+            if (id) {
+                // แก้ไขรายจ่าย
+                const index = expenses.findIndex(e => e.id == id);
+                if (index !== -1) {
+                    expenses[index] = { id: parseInt(id), description, amount, date };
+                    showAlert('แก้ไขรายจ่ายเรียบร้อยแล้ว!', 'success');
+                }
+            } else {
+                // เพิ่มรายจ่ายใหม่
+                expenses.push({ id: nextId++, description, amount, date });
+                showAlert('เพิ่มรายจ่ายเรียบร้อยแล้ว!', 'success');
+            }
+
+            showExpenseList();
+        }
+
+        // แสดง modal ยืนยันการลบ
+        function showDeleteModal(id) {
+            const expense = expenses.find(e => e.id === id);
+            if (!expense) return;
+
+            deleteId = id;
+            document.getElementById('delete-details').innerHTML = `
+                <strong>รายการ:</strong> ${expense.description}<br>
+                <strong>จำนวนเงิน:</strong> ${expense.amount.toFixed(2)} บาท<br>
+                <strong>วันที่:</strong> ${formatDate(expense.date)}
+            `;
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+
+        // ยืนยันการลบ
+        function confirmDelete() {
+            if (deleteId) {
+                expenses = expenses.filter(e => e.id !== deleteId);
+                showAlert('ลบรายจ่ายเรียบร้อยแล้ว!', 'success');
+                deleteId = null;
+                
+                const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+                modal.hide();
+                
+                renderExpenses();
+            }
+        }
+
+        // แสดงรายการรายจ่าย
+        function renderExpenses() {
+            const tbody = document.getElementById('expenses-tbody');
+            const emptyState = document.getElementById('empty-state');
+            
+            if (expenses.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                document.getElementById('total-amount').textContent = '0.00 บาท';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            
+            // เรียงลำดับตามวันที่ใหม่สุดก่อน
+            const sortedExpenses = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            tbody.innerHTML = sortedExpenses.map((expense, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${expense.description}</td>
+                    <td class="text-end">${expense.amount.toFixed(2)} บาท</td>
+                    <td>${formatDate(expense.date)}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-primary" onclick="showEditForm(${expense.id})">
+                                แก้ไข
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="showDeleteModal(${expense.id})">
+                                ลบ
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            // คำนวณยอดรวม
+            const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+            document.getElementById('total-amount').textContent = `${total.toFixed(2)} บาท`;
+        }
+
+        // จัดรูปแบบวันที่
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+        }
+
+        // แสดงข้อความแจ้งเตือน
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.querySelector('.container').insertBefore(alertDiv, document.getElementById('app'));
+            
+            // ลบ alert หลัง 5 วินาที
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // เริ่มต้นแอพ
+        document.addEventListener('DOMContentLoaded', function() {
+            showExpenseList();
+        });
+    </script>
+</body>
+</html>

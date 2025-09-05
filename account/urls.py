@@ -22,3 +22,4 @@ urlpatterns = [
     path('', include('account_management.urls')),
    
 ]
+

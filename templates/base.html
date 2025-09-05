@@ -187,12 +187,11 @@
         >
           <span class="navbar-toggler-icon"></span>
         </button>
-        
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+              </a>
+            </li>
             <li class="nav-item">
               <a class="nav-link fw-semibold" href="{% url "index" %}">
-                <i class="bi bi-house me-1"></i>หน้าหลัก
+                <i class="bi bi-cash-coin me-1"></i> รายการรายจ่าย
               </a>
             </li>
             {% comment %} navbar ตรงนี้นะ {% endcomment %}
@@ -200,13 +199,11 @@
         </div>
       </div>
     </nav>
-
-    <main class="flex-grow-1" style="padding-top: 80px;">
+  <main class="flex-grow-1" style="padding-top: 80px;">
       <div class="container py-4">
         {% block content %}{% endblock content %}
       </div>
     </main>
-
     <footer class="text-dark py-4 mt-auto">
       <div class="container">
         <div class="row">
