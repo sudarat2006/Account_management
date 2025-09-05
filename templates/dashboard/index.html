@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}แดชบอร์ด - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <h2 class="mb-2">
+                        <i class="bi bi-speedometer2"></i> 
+                        สวัสดี {{ user.first_name|default:user.username }}!
+                    </h2>
+                    <p class="mb-0 opacity-75">ยินดีต้อนรับสู่ระบบจัดการการเงินส่วนตัว</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card stat-card income-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 opacity-75">รายรับเดือนนี้</h6>
+                            <h3 class="mb-0">{{ total_income|floatformat:2 }} ฿</h3>
+                        </div>
+                        <div class="ms-3">
+                            <i class="bi bi-arrow-up-circle" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card stat-card expense-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 opacity-75">รายจ่ายเดือนนี้</h6>
+                            <h3 class="mb-0">{{ total_expense|floatformat:2 }} ฿</h3>
+                        </div>
+                        <div class="ms-3">
+                            <i class="bi bi-arrow-down-circle" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card stat-card balance-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 opacity-75">ยอดคงเหลือ</h6>
+                            <h3 class="mb-0 {% if balance < 0 %}text-warning{% endif %}">
+                                {{ balance|floatformat:2 }} ฿
+                            </h3>
+                        </div>
+                        <div class="ms-3">
+                            <i class="bi bi-wallet2" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-lightning"></i> การกระทำด่วน
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'transaction_add' %}?type=income" class="btn btn-success w-100">
+                                <i class="bi bi-plus-circle"></i> เพิ่มรายรับ
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'transaction_add' %}?type=expense" class="btn btn-danger w-100">
+                                <i class="bi bi-dash-circle"></i> เพิ่มรายจ่าย
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'transaction_list' %}" class="btn btn-primary w-100">
+                                <i class="bi bi-list-ul"></i> ดูรายการทั้งหมด
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'profile' %}" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-person"></i> โปรไฟล์
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history"></i> รายการล่าสุด
+                    </h5>
+                    <a href="{% url 'transaction_list' %}" class="btn btn-outline-primary btn-sm">
+                        ดูทั้งหมด <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_transactions %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>วันที่</th>
+                                        <th>รายการ</th>
+                                        <th>หมวดหมู่</th>
+                                        <th>จำนวนเงิน</th>
+                                        <th>ประเภท</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transaction in recent_transactions %}
+                                    <tr>
+                                        <td>{{ transaction.date|date:"d/m/Y" }}</td>
+                                        <td>{{ transaction.title }}</td>
+                                        <td>
+                                            <span class="badge" style="background-color: {{ transaction.category.color }};">
+                                                {{ transaction.category.icon }} {{ transaction.category.name }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="{% if transaction.is_income %}text-success{% else %}text-danger{% endif %} fw-bold">
+                                                {% if transaction.is_income %}+{% else %}-{% endif %}{{ transaction.amount|floatformat:2 }} ฿
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if transaction.is_income %}
+                                                <span class="badge bg-success">รายรับ</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">รายจ่าย</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                            <h5 class="mt-3 text-muted">ยังไม่มีรายการ</h5>
+                            <p class="text-muted">เริ่มต้นโดยการเพิ่มรายรับหรือรายจ่ายของคุณ</p>
+                            <div class="mt-3">
+                                <a href="{% url 'transaction_add' %}?type=income" class="btn btn-success me-2">
+                                    <i class="bi bi-plus"></i> เพิ่มรายรับ
+                                </a>
+                                <a href="{% url 'transaction_add' %}?type=expense" class="btn btn-danger">
+                                    <i class="bi bi-plus"></i> เพิ่มรายจ่าย
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Monthly Chart Data
+const monthlyIncomeData = {{ monthly_income|safe }};
+const monthlyExpenseData = {{ monthly_expense|safe }};
+
+// Chart Configuration
+const ctx = document.getElementById('monthlyChart');
+if (ctx) {
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'],
+            datasets: [{
+                label: 'รายรับ',
+                data: monthlyIncomeData,
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.4
+            }, {
+                label: 'รายจ่าย',
+                data: monthlyExpenseData,
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'รายรับ-รายจ่าย รายเดือน'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString() + ' ฿';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
+{% endblock %}

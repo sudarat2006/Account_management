@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header {% if transaction_type == 'income' %}bg-success{% else %}bg-danger{% endif %} text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-{% if transaction_type == 'income' %}plus-circle{% else %}dash-circle{% endif %}"></i>
+                        {{ title }}
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.category.id_for_label }}" class="form-label">
+                                    <i class="bi bi-tags"></i> {{ form.category.label }} *
+                                </label>
+                                {{ form.category }}
+                                {% if form.category.errors %}
+                                    <div class="text-danger small">{{ form.category.errors.0 }}</div>
+                                {% endif %}
+                                {% if not form.category.queryset %}
+                                    <div class="text-warning small mt-1">
+                                        <i class="bi bi-exclamation-triangle"></i> 
+                                        ยังไม่มีหมวดหมู่สำหรับ{{ title }} กรุณาติดต่อผู้ดูแลระบบ
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.amount.id_for_label }}" class="form-label">
+                                    <i class="bi bi-currency-dollar"></i> {{ form.amount.label }} *
+                                </label>
+                                <div class="input-group">
+                                    {{ form.amount }}
+                                    <span class="input-group-text">บาท</span>
+                                </div>
+                                {% if form.amount.errors %}
+                                    <div class="text-danger small">{{ form.amount.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.title.id_for_label }}" class="form-label">
+                                    <i class="bi bi-card-text"></i> {{ form.title.label }} *
+                                </label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="text-danger small">{{ form.title.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.date.id_for_label }}" class="form-label">
+                                    <i class="bi bi-calendar"></i> {{ form.date.label }} *
+                                </label>
+                                {{ form.date }}
+                                {% if form.date.errors %}
+                                    <div class="text-danger small">{{ form.date.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">
+                                <i class="bi bi-file-text"></i> {{ form.description.label }}
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger small">{{ form.description.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">
+                                <i class="bi bi-sticky"></i> {{ form.notes.label }}
+                            </label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div class="text-danger small">{{ form.notes.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-{% if transaction_type == 'income' %}success{% else %}danger{% endif %} btn-lg">
+                                <i class="bi bi-check-circle"></i> บันทึกรายการ
+                            </button>
+                            <a href="{% url 'transaction_list' %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-arrow-left"></i> ยกเลิก
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Help Section -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="text-muted mb-3">
+                        <i class="bi bi-info-circle"></i> คำแนะนำ
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled small text-muted">
+                                <li><i class="bi bi-check text-success"></i> เลือกหมวดหมู่ที่เหมาะสม</li>
+                                <li><i class="bi bi-check text-success"></i> ระบุจำนวนเงินที่ถูกต้อง</li>
+                                <li><i class="bi bi-check text-success"></i> ใส่ชื่อรายการที่เข้าใจง่าย</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled small text-muted">
+                                <li><i class="bi bi-check text-success"></i> เลือกวันที่ที่ถูกต้อง</li>
+                                <li><i class="bi bi-check text-success"></i> เพิ่มรายละเอียดหากจำเป็น</li>
+                                <li><i class="bi bi-check text-success"></i> ใส่หมายเหตุเพิ่มเติม</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Set today's date as default
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.querySelector('input[type="date"]');
+    if (dateInput && !dateInput.value) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,135 +1,14 @@
 from django.contrib import admin
-from django.urls import path
-from django.http import HttpResponse
+from django.urls import path, include
+from django.shortcuts import redirect
 
+def home_redirect(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return redirect('login')
 
-# ---------------- Dashboard ----------------
-def home(request):
-    html = """ 
-    <html>
-    <head>
-        <title>ระบบจัดการบัญชี</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    </head>
-    <body class="bg-light">
-        <div class="container py-5">
-            <div class="card shadow mb-4 border-0">
-                <div class="card-body text-center">
-                    <h1 class="mb-3 text-success">📊 Dashboard รายรับ</h1>
-                    <p class="lead text-muted">ติดตามและจัดการข้อมูลรายรับของคุณ</p>
-                    <a href="/income/" class="btn btn-success btn-lg">ไปยังหน้ารายรับ</a>
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    return HttpResponse(html)
-
-
-# ---------------- รายรับ ----------------
-def income_list(request):
-    html = """
-    <html>
-    <head>
-        <title>รายรับ</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    </head>
-    <body class="bg-light">
-        <div class="container py-5">
-            <div class="card shadow border-success">
-                <div class="card-body">
-                    <h2 class="mb-4 text-success">📗 รายรับทั้งหมด</h2>
-                    <table class="table table-hover">
-                        <thead class="table-success">
-                            <tr>
-                                <th>#</th>
-                                <th>รายการ</th>
-                                <th>จำนวนเงิน</th>
-                                <th>วันที่</th>
-                                <th>การจัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>เงินเดือน</td>
-                                <td>25,000 บาท</td>
-                                <td>01/09/2025</td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-warning">แก้ไข</a>
-                                    <a href="#" class="btn btn-sm btn-danger">ลบ</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>โบนัส</td>
-                                <td>5,000 บาท</td>
-                                <td>05/09/2025</td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-warning">แก้ไข</a>
-                                    <a href="#" class="btn btn-sm btn-danger">ลบ</a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <a href="/income/add/" class="btn btn-success mt-3">➕ เพิ่มรายรับ</a>
-                    <a href="/" class="btn btn-outline-secondary mt-3">⬅ กลับหน้าหลัก</a>
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    return HttpResponse(html)
-
-
-def income_add(request):
-    html = """
-    <html>
-    <head>
-        <title>เพิ่มรายรับ</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    </head>
-    <body class="bg-light">
-        <div class="container py-5">
-            <div class="card shadow border-success">
-                <div class="card-body">
-                    <h2 class="mb-4 text-success">➕ เพิ่มรายรับ</h2>
-                    <form>
-                        <div class="mb-3">
-                            <label class="form-label">รายการ</label>
-                            <input type="text" class="form-control" placeholder="เช่น เงินเดือน, โบนัส">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">จำนวนเงิน</label>
-                            <input type="number" class="form-control" placeholder="เช่น 5000">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">วันที่</label>
-                            <input type="date" class="form-control">
-                        </div>
-                        <button type="submit" class="btn btn-success">บันทึก</button>
-                        <a href="/income/" class="btn btn-outline-secondary">ยกเลิก</a>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    return HttpResponse(html)
-
-
-# ---------------- URL ----------------
 urlpatterns = [
     path('admin/', admin.site.urls),
-
-    # Dashboard
-    path('', home, name='home'),
-
-    # รายรับ
-    path('income/', income_list, name='income_list'),
-    path('income/add/', income_add, name='income_add'),
+    path('', home_redirect, name='home'),
+    path('', include('account_management.urls')),
 ]
-
