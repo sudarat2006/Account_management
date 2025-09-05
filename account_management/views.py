@@ -23,6 +23,16 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
+@login_required(login_url='login')  # ถ้าไม่ล็อกอินจะไปหน้า login
+def profile(request):
+    user = request.user
+    context = {
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'username': user.username,
+    }
+    return render(request, 'profile.html', context)
+
 from django.contrib.auth.decorators import login_required
 
 def profile(request):
@@ -45,7 +55,7 @@ def register(request):
         if User.objects.filter(username=username).exists():
             messages.error(request, 'ชื่อผู้ใช้นี้ถูกใช้ไปแล้ว')
         else:
-
+        
             user = User.objects.create_user(
                 username=username,
                 password=password,
